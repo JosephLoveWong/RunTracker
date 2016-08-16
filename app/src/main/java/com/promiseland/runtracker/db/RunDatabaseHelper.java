@@ -1,8 +1,12 @@
 package com.promiseland.runtracker.db;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.location.Location;
+
+import com.promiseland.runtracker.bean.Run;
 
 /**
  * Created by 960100 on 2016/8/16.
@@ -24,8 +28,8 @@ public class RunDatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_LOCATION_PROVIDER = "provider";
     private static final String COLUMN_LOCATION_RUN_ID = "run_id";
 
-    public RunDatabaseHelper(Context context, String name, SQLiteDatabase.CursorFactory factory, int version) {
-        super(context, DB_NAME, factory, VERSION);
+    public RunDatabaseHelper(Context context) {
+        super(context, DB_NAME, null, VERSION);
     }
 
     @Override
@@ -41,5 +45,23 @@ public class RunDatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onUpgrade(SQLiteDatabase sqLiteDatabase, int oldVersion, int newVersion) {
 
+    }
+
+    public long insertRun(Run run){
+        ContentValues cv = new ContentValues();
+        cv.put(COLUMN_RUN_START_DATE, run.getStartDate().getTime());
+        SQLiteDatabase db = getWritableDatabase();
+        return db.insert(TABLE_RUN, null, cv);
+    }
+
+    public long insertLocation(long runId, Location location) {
+        ContentValues cv = new ContentValues();
+        cv.put(COLUMN_LOCATION_LATITUDE, location.getLatitude());
+        cv.put(COLUMN_LOCATION_LONGITUDE, location.getLongitude());
+        cv.put(COLUMN_LOCATION_ALTITUDE, location.getAltitude());
+        cv.put(COLUMN_LOCATION_TIMESTAMP, location.getTime());
+        cv.put(COLUMN_LOCATION_PROVIDER, location.getProvider());
+        cv.put(COLUMN_LOCATION_RUN_ID, runId);
+        return getWritableDatabase().insert(TABLE_LOCATION, null, cv);
     }
 }

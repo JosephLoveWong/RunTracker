@@ -7,6 +7,8 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.util.Log;
 
+import com.promiseland.runtracker.bean.RunManager;
+
 /**
  * Created by 960100 on 2016/8/16.
  */
@@ -30,6 +32,7 @@ public class LocationReceiver extends BroadcastReceiver {
 
     protected void onLocationReceived(Context context, Location loc) {
         Log.d(TAG, this + " Got location from " + loc.getProvider() + ": " + loc.getLatitude() + ", " + loc.getLongitude());
+        RunManager.getInstance(context).insertLocation(loc);
     }
 
     protected void onProviderEnabledChanged(boolean enabled) {

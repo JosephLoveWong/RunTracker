@@ -8,10 +8,20 @@ import java.util.Date;
 public class Run {
     private static final String TAG = "Run";
 
+    private long mId;
     private Date mStartDate;
 
     public Run() {
+        mId = -1;
         mStartDate = new Date();
+    }
+
+    public long getId() {
+        return mId;
+    }
+
+    public void setId(long id) {
+        mId = id;
     }
 
     public Date getStartDate() {
