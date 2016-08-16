@@ -3,6 +3,8 @@
           package="com.promiseland.runtracker">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-feature android:required="true" android:name="android.hardware.location.gps"/>
 
     <application
         android:allowBackup="true"
@@ -17,6 +19,13 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
+
+        <receiver android:name=".receiver.LocationReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.promiseland.runtracker.ACTION_LOCATION"/>
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>
