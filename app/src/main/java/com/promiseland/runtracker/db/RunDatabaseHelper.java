@@ -2,11 +2,15 @@ package com.promiseland.runtracker.db;
 
 import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.CursorWrapper;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.location.Location;
 
 import com.promiseland.runtracker.bean.Run;
+
+import java.util.Date;
 
 /**
  * Created by 960100 on 2016/8/16.
@@ -63,5 +67,74 @@ public class RunDatabaseHelper extends SQLiteOpenHelper {
         cv.put(COLUMN_LOCATION_PROVIDER, location.getProvider());
         cv.put(COLUMN_LOCATION_RUN_ID, runId);
         return getWritableDatabase().insert(TABLE_LOCATION, null, cv);
+    }
+
+    public RunCursor queryRuns() {
+        // equivalent to "select * from run order by start_date asc"
+        Cursor wrapped = getReadableDatabase().query(TABLE_RUN,
+                null, null, null, null, null, COLUMN_RUN_START_DATE + " asc");
+        return new RunCursor(wrapped);
+    }
+
+    public RunCursor queryRun(long id){
+        Cursor query = getReadableDatabase().query(TABLE_RUN,
+                null,
+                COLUMN_RUN_ID + " = ?",
+                new String[]{String.valueOf(id)},
+                null,
+                null,
+                null,
+                "1");
+        return new RunCursor(query);
+    }
+
+    public LocationCursor queryLastLocationForRun(long runId) {
+        Cursor wrapped = getReadableDatabase().query(TABLE_LOCATION,
+                null, // all columns
+                COLUMN_LOCATION_RUN_ID + " = ?", // limit to the given run
+                new String[]{ String.valueOf(runId) },
+                null, // group by
+                null, // having
+                COLUMN_LOCATION_TIMESTAMP + " desc", // order by latest first
+                "1"); // limit 1
+        return new LocationCursor(wrapped);
+    }
+
+    public static class RunCursor extends CursorWrapper{
+
+        public RunCursor(Cursor cursor) {
+            super(cursor);
+        }
+
+        public Run getRun(){
+            if(isBeforeFirst() || isAfterLast()){
+                return null;
+            }
+            Run run = new Run();
+            run.setId(getLong(getColumnIndex(COLUMN_RUN_ID)));
+            run.setStartDate(new Date(getLong(getColumnIndex(COLUMN_RUN_START_DATE))));
+            return run;
+        }
+    }
+
+    public static class LocationCursor extends CursorWrapper {
+
+        public LocationCursor(Cursor c) {
+            super(c);
+        }
+
+        public Location getLocation() {
+            if (isBeforeFirst() || isAfterLast())
+                return null;
+            // first get the provider out so we can use the constructor
+            String provider = getString(getColumnIndex(COLUMN_LOCATION_PROVIDER));
+            Location loc = new Location(provider);
+            // populate the remaining properties
+            loc.setLongitude(getDouble(getColumnIndex(COLUMN_LOCATION_LONGITUDE)));
+            loc.setLatitude(getDouble(getColumnIndex(COLUMN_LOCATION_LATITUDE)));
+            loc.setAltitude(getDouble(getColumnIndex(COLUMN_LOCATION_ALTITUDE)));
+            loc.setTime(getLong(getColumnIndex(COLUMN_LOCATION_TIMESTAMP)));
+            return loc;
+        }
     }
 }

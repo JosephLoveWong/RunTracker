@@ -113,6 +113,10 @@ public class RunManager {
         return run;
     }
 
+    public RunDatabaseHelper.RunCursor queryRuns() {
+        return mHelper.queryRuns();
+    }
+
     public void insertLocation(Location loc) {
         if (mCurrentRunId != -1) {
             mHelper.insertLocation(mCurrentRunId, loc);
